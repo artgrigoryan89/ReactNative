@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, Text, Dimensions, Button, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, Dimensions, Button, TouchableOpacity, Switch } from 'react-native';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import Modal from "react-native-modal";
 import Input from './common/FormInput';
@@ -9,41 +9,60 @@ export default class List extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            isFirebase: this.props.isFirebase,
             isModalOpen: false,
-            listData: [],
+            list: [],
             text: ''
         }
     }
 
-  componentWillReceiveProps () {
-       let data = this.props.firebaseListData;
-       let listData = [];
-       Object.keys(data).map((key) => listData.push(data[key]));
-      this.setState({listData})
+    componentWillReceiveProps (nextProps) {
+       const listData = nextProps.listData;
+       const firebaseListData = nextProps.firebaseListData;
+       let list = [];
+       if(nextProps.isFirebase) {
+          Object.keys(firebaseListData).map((key) => list.push(firebaseListData[key]));
+       } else {
+         list = listData
+       }
+       this.setState({
+            isFirebase:nextProps.isFirebase,
+            list: list
+       })
+    }
+
+    switcherToogle = () => {
+        this.props.changeBase(!this.state.isFirebase);
+        this.setState({ isFirebase: !this.state.isFirebase });
     }
 
     toggleModal = () => this.setState({ isModalOpen: !this.state.isModalOpen });
 
-
     removeItem = (data) => {
-        const listData = [...this.state.listData];
-        listData.splice(data.index, 1);
-        this.props.removeListItem(data.index)
+        const {isFirebase} = this.state;
+        if(isFirebase) {
+            this.props.removeListItem(data)
+        } else {
+            this.props.removeItemRedux(data.item)
+        }
     };
 
     onCreateItem = () => {
         this.toggleModal();
-        const {text} = this.state;
-        let listData = [...this.state.listData];
+        const {text, list, isFirebase} = this.state;
+        list.push(text);
         if (text !== '') {
-            listData.push(text);
             this.onChangeText('');
-          this.props.addListNote(text)
+            if(isFirebase) {
+               this.props.addListItem(text)
+            } else {
+               this.props.addItemRedux(list)
+           }
         }
     };
 
     onChangeText = (text) => {
-            this.setState({text})
+        this.setState({text})
     };
 
     renderModal = () => {
@@ -76,11 +95,12 @@ export default class List extends Component {
     render() {
         return (
             <View style={styles.container}>
+                <Switch value={this.state.isFirebase} onValueChange={() => this.switcherToogle()} />
                 <SwipeListView
                     style={{width: width}}
                     disableRightSwipe
                     useFlatList
-                    data={this.state.listData}
+                    data={this.state.list}
                     renderItem={ (data, rowMap) => (
                         <View style={styles.rowFront}>
                             <Text>{data.item}</Text>

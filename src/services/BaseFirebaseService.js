@@ -8,12 +8,9 @@ export default class BaseFirebaseService{
     }
 
     getData() {
-      fetch("http://google.com").then(() => {
-        console.log("Doneeeeeeeeee")
-      })
-      return this.ref.once('value').then(() => {
-        console.log(arguments)
-        return arguments[0]
+      return this.ref.once('value').then((snapshot) => {
+        console.log(snapshot)
+        return snapshot
       }).catch(err => {
         console.log(err)
         console.log(err)

@@ -6,7 +6,6 @@ import {NoteService} from '../services/NoteService';
 import {ADD_ITEM_FIREBASE, REMOVE_ITEM_FIREBASE, addItem, updateData, getData, UPDATE_DATA, GET_DATA} from '../actions/list';
 import { hideWaitingModal} from "../actions/waitingModal";
 import {registerError} from '../actions/auth';
-//import {getData} from "../actions/list";
 
 const uId = firebase.auth().currentUser.uid;
 const service = new NoteService(uId);
